@@ -1,25 +1,38 @@
 "use strict";
 
+
+// Require all the needed packages.
 let { ServiceBroker } 	= require("moleculer");
 let ApiGatewayService 	= require("moleculer-web");
 let express 			= require("express");
 
-// Create broker
+
+// Initialize the Service Broker.
 let broker = new ServiceBroker({
 	logger: console
 });
 
-// Load other services
+
+// Load our webhooks microservice.
 broker.loadService("./services/webhooks.service");
 
-// Load API Gateway
+
+// Load API Gateway.
 const svc = broker.createService({
+
+
+	// Import all mixins.
 	mixins: ApiGatewayService,
 
+
+	// Set the settings.
 	settings: {
+
 		server: false,
+
 		routes: [{
 
+			// Whitelist all out actions in the webhooks service so that response from them can be captured.
 			whitelist: [
 				"webhooks.register",
                 "webhooks.list",
@@ -28,18 +41,29 @@ const svc = broker.createService({
                 "webhooks.trigger",
 			],
 
+			// Set alias for trigger action as it on /ip route in actual.
+			aliases: {
+                "webhooks/ip": "webhooks.trigger"
+            },
+
+			// Set proper mapping.
 			mappingPolicy: "all"
+
 		}]
 	}
 });
 
-// Create Express application
+
+// Create Express application.
 const app = express();
 
-// Use ApiGateway as middleware
+
+// Use ApiGateway as middleware. 
+// This is essential! Otherwise, communications can't take place between the webhooks service and our Express app.
 app.use("/api", svc.express());
 
-// Listening
+
+// Listen on port 3333.
 app.listen(3333, err => {
 	if (err)
 		return console.error(err);
@@ -47,5 +71,6 @@ app.listen(3333, err => {
 	console.log("Open http://localhost:3333/api");
 });
 
-// Start server
+
+// Start the Broker Service.
 broker.start();

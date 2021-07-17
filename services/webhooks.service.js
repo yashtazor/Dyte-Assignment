@@ -1,18 +1,36 @@
 "use strict";
 
-const { ServiceBroker } = require("moleculer");
-const DbService = require("moleculer-db");
-let ApiGatewayService 	= require("moleculer-web");
-const MongoDBAdapter = require("moleculer-db-adapter-mongo");
-const asynclib = require("async");
-const axios = require("axios");
 
-let broker = new ServiceBroker({
-	logger: console,
-	logLevel: "debug"
+// Require all the needed packages.
+const { ServiceBroker } 	= require("moleculer");
+const ApiGatewayService 	= require("moleculer-web");
+const DbService 			= require("moleculer-db");
+const MongoDBAdapter 		= require("moleculer-db-adapter-mongo");
+const asynclib 				= require("async");
+const axios 				= require("axios");
+const axiosRetry 			= require('axios-retry');
+
+
+// Define Axios Retry's conditions for retrying requests.
+axiosRetry(axios, {
+
+  retries: 5,
+  shouldResetTimeout: true,
+  retryCondition: () => true
+
 });
 
-// Intialize the MongoDB adapter service.
+
+// Initialize the Service Broker.
+let broker = new ServiceBroker({
+
+	logger: console,
+	logLevel: "debug"
+
+});
+
+
+// Make a MongoDB adapter service.
 broker.createService({
 
 	name: "posts",
@@ -22,53 +40,72 @@ broker.createService({
 
 });
 
+
+// Make the main module for webhooks microservice.
 module.exports = {
+
+
+	// Set the name.
     name: "webhooks",
 
-	//mixins: [ApiGatewayService],
 
+	// Set the settings.
 	settings: {
-		// Available fields in the responses.
+		
+		// Fields in responses. We need only IDs or URLs.
 		fields: [
 			"_id",
 			"url",
 		],
 	},
 
+
+	// Define all the actions along with their routes.
     actions: {
 		
-		// Action to register a URL. (POST)
+
+		// Action to register a URL.
+		// Gets targetUrl and saves it to MongoDB.
+		// POST Request.
 		register: {
 
+			// Define the REST information along with routes.
 			rest: {
 				method: "POST",
-				path: "/register/:url"
+				path: "/register/:targetUrl"
 			},
 
+			// Define the parameters.
 			params: {
-				url: "string"
+				targetUrl: "string"
 			},
 
+			// Define the finctionality of this action.
 			async handler(ctx) {
 
 				let ans;
 
-				await broker.start().then(() => broker.call("posts.create", { url: ctx.params.url,}).then(response => {
+				await broker.start().then(() => broker.call("posts.create", { url: ctx.params.targetUrl,}).then(response => {
 					ans = JSON.stringify(response._id);
 				}));
 
+				// Returns the ID of the just stored targetUrl in JSON format.
 				return (JSON.parse(ans));
 			}			
 		},
 
-		// Action to list all users. (GET)
+
+		// Action to list all webhook URLs.
+		// GET Request.
         list: {
 
+			// Define the REST information along with routes.
 			rest: {
 				method: "GET",
 				path: "/list"
 			},
 
+			// Define the finctionality of this action.			
 			async handler() {
 
 				let ans;
@@ -77,24 +114,31 @@ module.exports = {
 					ans = JSON.stringify(response);
 				}));			
 
+				// Returns all the stored webhook IDs and URLs in JSON format.
 				return(JSON.parse(ans));
 
 			}
 		},
 
-		// Action to update a user. (PUT)
+
+		// Action to update an URLs.
+		// Gets id of the URL to be changed and changes it with newTargetUrl.
+		// PUT Request.
 		update: {
 
+			// Define the REST information along with routes.
 			rest: {
 				method: "PUT",
 				path: "/update/:id/:newTargetUrl"
 			},
 
+			// Define the parameters.
 			params: {
 				id: "string",
 				newTargetUrl: "string"
 			},
 
+			// Define the finctionality of this action.
 			async handler(ctx) {
 
 				let ans;
@@ -103,6 +147,7 @@ module.exports = {
 				.then((response) => { ans = JSON.stringify(response); })
 				.catch(err => { ans = JSON.stringify(err.code); });
 
+				// Return appropriate response status after updation.
 				if(ans == "404")
 					return("Unable to update in the database! Response Status Code: " + ans);
 				else
@@ -110,18 +155,24 @@ module.exports = {
 			}
 		},
 
-		// Action to delete a user. (DELETE)
+
+		// Action to delete a user.
+		// Gets id of the URL to be deleted and deleted it from the database.
+		// DELETE Request.
 		delete: {
 
+			// Define the REST information along with routes.
 			rest: {
 				method: "DELETE",
 				path: "/delete/:id"
 			},
 
+			// Define the parameters.
 			params: {
 				id: "string",
 			},
 
+			// Define the finctionality of this action.
 			async handler(ctx) {
 
 				let ans;
@@ -130,28 +181,33 @@ module.exports = {
 				.then((response) => { ans = JSON.stringify(response); })
 				.catch(err => { ans = JSON.stringify(err.code); });
 
+				// Return appropriate response status after deletion.
 				if(ans == "404")
 					return("Unable to delete from the database due to invalid ID! Response Status Code: " + ans);
 				else
 					return("Deleted from the database! Response Status Code: 200");
-
 			}
 		},
 
-		// Trigger action.
+
+		// Webhook Trigger Action.
+		// Retrieves some URLs from the database makes a (URL, UNIX Timestamp) payload and send multiple requests parallely.
+		// DELETE Request.
 		trigger: {
 
+			// Define the REST information along with routes.
 			rest: {
 				method: "GET",
 				path: "/ip"
 			},
 
+			// Define the finctionality of this action.
 			async handler() {
 
-				// Extract some URLs from database by posts.list service and store in an array.
-				let ans, ipadd;
-				var urls = [];
+				let ans, ipadd, urls = [];
 
+				// Extract some URLs from database by posts.list service and store in an array.
+				// This limit can be changed as per how many URLs have to be retrieved.
 				await broker.start().then(() => broker.call("posts.find", { limit: 5 }).then((response) => {					
 
 					ans = JSON.parse(JSON.stringify(response));
@@ -162,17 +218,18 @@ module.exports = {
 				// Get the exposed IP address of the client.
 				ipadd = ApiGatewayService.settings.ip;
 
-				// Make parallelized HTTP POST requests 5 at a time. (Can be customized!)
+				// Make parallelized HTTP POST requests 5 at a time. (Can be customized)
 				asynclib.mapLimit(urls, 5, function(url, callback) {
 
 					// Make a pair(ipAddress, Timestamp) on the fly to send as a payload to requests.
-					const data = {
+					const payload = {
 						ip: url,
 						time: new Date()
 					};
 
 					// Make an Axios HTTP POST request with our payload data.
-					axios.post(url, data)
+					// Keeps retrying for a maximum of 5 attempts.
+					axios.post(url, payload)
 					.then((res) => {
 
 						console.log(`Status: ${res.status}`);
@@ -189,7 +246,8 @@ module.exports = {
 
 				});
 
-				return("Parallel requests sent to the following URLs\n" + ans);
+				// Return the list of all URLs sent request parallely.
+				return("The following URLs were sent request parallely. " + JSON.stringify(ans));
 			}
 		},
 }};
