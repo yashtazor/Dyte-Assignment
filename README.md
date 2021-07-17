@@ -1,10 +1,10 @@
 # Dyte Assignment
 
-This project has been made as an assignment for Dyte's recruitment process. I chose the topic of **Backend** wherein we were required to build a **Webhooks Microservice**.
+This project has been made as an assignment for Dyte's recruitment process. I chose the topic of **Backend** wherein we were required to build a **Webhooks Microservice using Molecular JS and Express JS**.
 
 ## Libraries Required
 
-These libraries are needed to be installed to run this project successfully.
+The following libraries were used
 
 * Express
 * Nodemon
@@ -14,10 +14,14 @@ These libraries are needed to be installed to run this project successfully.
 
 ## Database & Schema Used
 
+The following database and schema were used
+
 * MongoDB (Local Instance)
 * The Collections store only the **ID** and the **URL**.
 
 ## How to run?
+
+Follow these steps to run or test this project
 
 * Install all the above libraries. Use **``npm install --save LIBRARY_NAME``** command.
 * Create a local MongoDB instance with a collection called **Test**.
@@ -38,6 +42,8 @@ Be sure to check the updations in **MongoDB** for the first four actions. The re
 
 ## Tasks Achieved
 
+The following tasks were achieved
+
 * An Express backend with **register**, **list**, **update**, and **delete** which lets the admin do **CRUD** operations with stored webhooks.
 * An **ip** route which captures the IP of the client and sends it the the **trigger** action.
 * Complete Webhooks service with the following actions
@@ -49,6 +55,8 @@ Be sure to check the updations in **MongoDB** for the first four actions. The re
   * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests.
   
 ## Bonus Tasks Achieved
+
+The following additonal tasks were achieved.
 
 * Retrying mechanism for **Trigger** service with a maximum of 5 tries.
 * Dockerizing the backend. (Incomplete)
