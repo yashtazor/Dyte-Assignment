@@ -86,8 +86,10 @@ module.exports = {
 				let ans;
 
 				await broker.start().then(() => broker.call("posts.create", { url: ctx.params.targetUrl,}).then(response => {
+
 					ans = JSON.stringify(response._id);
-				}));
+
+				}).catch(err => { console.log(err) }));
 
 				// Returns the ID of the just stored targetUrl in JSON format.
 				return (JSON.parse(ans));
@@ -111,8 +113,10 @@ module.exports = {
 				let ans;
 
 				await broker.start().then(() => broker.call("posts.find").then(response => {
+
 					ans = JSON.stringify(response);
-				}));			
+
+				}).catch(err => { console.log(err) }));
 
 				// Returns all the stored webhook IDs and URLs in JSON format.
 				return(JSON.parse(ans));
@@ -144,7 +148,11 @@ module.exports = {
 				let ans;
 
 				await broker.start().then(() => broker.call("posts.update", { id: ctx.params.id, url: ctx.params.newTargetUrl }))
-				.then((response) => { ans = JSON.stringify(response); })
+				.then((response) => { 
+
+					ans = JSON.stringify(response); 
+
+				})
 				.catch(err => { ans = JSON.stringify(err.code); });
 
 				// Return appropriate response status after updation.
@@ -178,7 +186,11 @@ module.exports = {
 				let ans;
 
 				await broker.start().then(() => broker.call("posts.remove", { id: ctx.params.id }))
-				.then((response) => { ans = JSON.stringify(response); })
+				.then((response) => { 
+
+					ans = JSON.stringify(response);
+
+				})
 				.catch(err => { ans = JSON.stringify(err.code); });
 
 				// Return appropriate response status after deletion.
@@ -213,7 +225,7 @@ module.exports = {
 					ans = JSON.parse(JSON.stringify(response));
 					ans.forEach((x, i) => urls.push(x.url));
 
-				}));
+				}).catch(err => { console.log(err) }));
 				
 				// Get the exposed IP address of the client.
 				ipadd = ApiGatewayService.settings.ip;

@@ -68,7 +68,7 @@ app.listen(3333, err => {
 	if (err)
 		return console.error(err);
 
-	console.log("Open http://localhost:3333/api");
+	console.log("Open http://localhost:3333");
 });
 
 
