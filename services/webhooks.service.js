@@ -2,7 +2,10 @@
 
 const { ServiceBroker } = require("moleculer");
 const DbService = require("moleculer-db");
+let ApiGatewayService 	= require("moleculer-web");
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
+const asynclib = require("async");
+const axios = require("axios");
 
 let broker = new ServiceBroker({
 	logger: console,
@@ -21,6 +24,8 @@ broker.createService({
 
 module.exports = {
     name: "webhooks",
+
+	//mixins: [ApiGatewayService],
 
 	settings: {
 		// Available fields in the responses.
@@ -143,27 +148,48 @@ module.exports = {
 
 			async handler() {
 
-				// Extract some URLs from database by posts.list and store in an array.
-				let ans;
+				// Extract some URLs from database by posts.list service and store in an array.
+				let ans, ipadd;
 				var urls = [];
 
-				await broker.start().then(() => broker.call("posts.find", { limit: 5 }).then((response) => {
+				await broker.start().then(() => broker.call("posts.find", { limit: 5 }).then((response) => {					
 
 					ans = JSON.parse(JSON.stringify(response));
-					ans.forEach((x, i) => urls.push(x._id));
+					ans.forEach((x, i) => urls.push(x.url));
 
-				}));		
+				}));
 				
-				//console.log(urls);
+				// Get the exposed IP address of the client.
+				ipadd = ApiGatewayService.settings.ip;
 
-				return(ans);
+				// Make parallelized HTTP POST requests 5 at a time. (Can be customized!)
+				asynclib.mapLimit(urls, 5, function(url, callback) {
 
-				// Inside the calling function,
+					// Make a pair(ipAddress, Timestamp) on the fly to send as a payload to requests.
+					const data = {
+						ip: url,
+						time: new Date()
+					};
 
-					// Make a pair(ipAdress, UNIX Timestamp) on the fly.
+					// Make an Axios HTTP POST request with our payload data.
+					axios.post(url, data)
+					.then((res) => {
 
-					// Send this pair to all the URLs in the array parallelly by a combination of broker.call 
-					// and asunc.parallelLimit or map.
+						console.log(`Status: ${res.status}`);
+
+					}).catch((err) => {
+
+						console.log(err);
+
+					});
+
+					}, function(err, results) {
+
+						console.log(err);
+
+				});
+
+				return("Parallel requests sent to the following URLs\n" + ans);
 			}
 		},
 }};
