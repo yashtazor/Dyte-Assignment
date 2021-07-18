@@ -1,6 +1,6 @@
-# Webhooks Microservice
+# Webvoke
 
-This is a simple **Webhooks Microservice** made using **Molecular JS and Express JS**.
+Webvoke is a simple **Webhooks Microservice** made using **Molecular JS and Express JS**.
 
 ## Libraries Required
 
