@@ -1,6 +1,6 @@
-# Dyte Assignment
+# Webhooks Microservice
 
-This project has been made as an assignment for Dyte's recruitment process. I chose the topic of **Backend** wherein we were required to build a **Webhooks Microservice using Molecular JS and Express JS**.
+This is a simple **Webhooks Microservice** made using **Molecular JS and Express JS**.
 
 ## Libraries Required
 
@@ -33,14 +33,14 @@ Action  | URL
 ------------- | -------------
 Register  | http://localhost:3333/api/webhooks/register/?targetUrl=YOURURL
 List  | http://localhost:3333/api/webhooks/list
-Update | http://localhost:3333/api/webhooks/update?id=MongoDBIDTargetUrl=YOURNEWURL
-Delete | http://localhost:3333/api/webhooks/delete?id=MongoDBID
+Update | http://localhost:3333/api/webhooks/update?id=MongoDBObjectID&newTargetUrl=YOURNEWURL
+Delete | http://localhost:3333/api/webhooks/delete?id=MongoDBObjectID
 Trigger | http://localhost:3333/api/webhooks/ip
 
 
-Be sure to check the updations in **MongoDB** for the first four actions. The response status for the **Trigger** action can only be seen in the terminal.
+All updates take place in **MongoDB** and the response status for the **Trigger** action can only be seen in the terminal.
 
-## Tasks Achieved
+## Features
 
 The following tasks were achieved
 
@@ -52,16 +52,6 @@ The following tasks were achieved
   * **List** - Which lists all the stored webhook URLs and IDs from MongoDB.
   * **Update** - Which updates a webhook URL with an **id** with a **newTargetUrl**.
   * **Delete** - Which deletes a webhook URL with an **id**.
-  * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests.
-  
-## Bonus Tasks Achieved
-
-The following additonal tasks were achieved.
+  * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests
 
 * Retrying mechanism for **Trigger** service with a maximum of 5 tries.
-* Dockerizing the backend. (Incomplete)
-
-<p align="center">
-<br> <br>
-<b>Submitted by Yash Dekate.</b>
-<p>
