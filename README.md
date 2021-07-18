@@ -17,7 +17,7 @@ The following libraries were used
 The following database and schema were used
 
 * MongoDB (Local Instance)
-* The Collections store only the **ID** and the **URL**.
+* The Collections store only the **ID** and the **URL**
 
 ## How to run?
 
@@ -52,6 +52,6 @@ The following tasks were achieved
   * **List** - Which lists all the stored webhook URLs and IDs from MongoDB.
   * **Update** - Which updates a webhook URL with an **id** with a **newTargetUrl**.
   * **Delete** - Which deletes a webhook URL with an **id**.
-  * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests
+  * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests.
 
 * Retrying mechanism for **Trigger** service with a maximum of 5 tries.
