@@ -23,7 +23,8 @@ The following database and schema were used
 
 Follow these steps to run or test this project
 
-* Install all the above libraries. Use **``npm install --save LIBRARY_NAME``** command.
+* Clone this repository and navigate inside the project directory.
+* Install all the required dependancies using **``npm install``** command.
 * Create a local MongoDB instance with a collection called **Test**.
 * Navigate to the main directory and run the **```nodemon index.js```** command.
 * Test the **Webhook Microservice** actions on the following routes using either **Postman** or **Browser**.
