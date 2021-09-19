@@ -56,3 +56,5 @@ The following tasks were achieved
   * **Trigger** - Which retrieves a number of webhook URLs from the database and keeps sending them (IP, UNIX Timestamp) payloads to them parallely in batches of 5 requests.
 
 * Retrying mechanism for **Trigger** service with a maximum of 5 tries.
+
+<b> <p align = "center"> Created by Yash Dekate. </p> </b>
